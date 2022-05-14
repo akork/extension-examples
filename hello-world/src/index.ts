@@ -10,7 +10,10 @@ const plugin: JupyterFrontEndPlugin<void> = {
   id: 'hello-world:plugin',
   autoStart: true,
   activate: (app: JupyterFrontEnd) => {
-    console.log('the JupyterLab main application:', app);
+    console.log(
+      'the JupyterLab main application directories:',
+      (app as any).paths.directories.serverRoot
+    );
   },
 };
 

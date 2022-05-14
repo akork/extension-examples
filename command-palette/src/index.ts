@@ -12,10 +12,16 @@ import '../style/index.css';
 class JupyterLabSublime {
   private tracker: INotebookTracker;
   private app: JupyterFrontEnd;
+  private palette: ICommandPalette;
 
-  constructor(app: JupyterFrontEnd, tracker: INotebookTracker) {
+  constructor(
+    app: JupyterFrontEnd,
+    palette: ICommandPalette,
+    tracker: INotebookTracker
+  ) {
     this.app = app;
     this.tracker = tracker;
+    this.palette = palette;
     this.addCommands();
     this.onActiveCellChanged();
     this.tracker.activeCellChanged.connect(this.onActiveCellChanged, this);
@@ -54,9 +60,24 @@ class JupyterLabSublime {
     (this.tracker.activeCell.editor as CodeMirrorEditor).editor.execCommand(id);
   }
 
+  private addCommand(name: string, fn: any) {
+    let dic = {
+      label: name,
+      execute: fn,
+    };
+    this.app.commands.addCommand(name, dic);
+    const category = 'Extension Examples';
+    this.palette.addItem({
+      command: name,
+      category: category,
+      args: { origin: 'from palette' },
+    });
+  }
+
   private addCommands() {
     // let editorExec = this.editorExec;
     let editorExec = this.editorExec.bind(this);
+    // let addCommand = this.addCommand.bind(this);
     const { commands } = this.app;
     // tslint:disable-next-line
     // const self = this;
@@ -159,12 +180,26 @@ class JupyterLabSublime {
       },
     });
 
+    commands.addCommand('cm:nlines_down', {
+      execute: () => {
+        var i = 6;
+        while (i--) editorExec('goLineDown');
+      },
+    });
+
+    commands.addCommand('cm:nlines_up', {
+      execute: () => {
+        var i = 6;
+        while (i--) editorExec('goLineUp');
+      },
+    });
+
     this.cmMap('Ctrl ArrowLeft', 'cm:eow_left');
     this.cmMap('Ctrl ArrowRight', 'cm:eow_right');
     this.cmMap('Alt ArrowLeft', ':goSubwordLeft');
     this.cmMap('Alt ArrowRight', ':goSubwordRight');
-    this.cmMap('PageDown', 'cm:goGroupRight');
-    this.cmMap('PageUp', 'cm:goGroupLeft');
+    this.cmMap('PageDown', 'cm:nlines_down');
+    this.cmMap('PageUp', 'cm:nlines_up');
     this.cmMap('Accel Shift D', ':duplicateLine');
     this.cmMap('Ctrl ArrowDown', ':addCursorToNextLine');
     this.cmMap('Ctrl ArrowUp', ':addCursorToPrevLine');
@@ -195,6 +230,18 @@ class JupyterLabSublime {
       command: 'ak:nlbelow',
       keys: ['Ctrl Alt 3'],
       selector: '.CodeMirror-focused',
+    });
+
+    this.addCommand('ak:cwd', () => {
+      var text = (this.app as any).paths.directories.serverRoot;
+      navigator.clipboard.writeText(text).then(
+        function () {
+          console.log('Async: Copying to clipboard was successful!');
+        },
+        function (err) {
+          console.error('Async: Could not copy text: ', err);
+        }
+      );
     });
 
     commands.addCommand('sublime:subword-backward-deletion', {
@@ -296,7 +343,7 @@ const extension: JupyterFrontEndPlugin<void> = {
     palette: ICommandPalette,
     tracker: INotebookTracker
   ) => {
-    const a = new JupyterLabSublime(app, tracker);
+    const a = new JupyterLabSublime(app, palette, tracker);
     console.log(a);
     // a.hello();
 
@@ -309,10 +356,16 @@ const extension: JupyterFrontEndPlugin<void> = {
       label: 'Execute jlab-examples:command-palette Command',
       caption: 'Execute jlab-examples:command-palette Command',
       execute: (args: any) => {
-        window.alert(
-          // console.log(
-          `hi, dudes! ${args['origin']}.`
+        var text = (app as any).paths.directories.serverRoot;
+        navigator.clipboard.writeText(text).then(
+          function () {
+            console.log('Async: Copying to clipboard was successful!');
+          },
+          function (err) {
+            console.error('Async: Could not copy text: ', err);
+          }
         );
+        // console.log('the JupyterLab main application directories:', (app as any).paths);
       },
     });
 
