@@ -34,6 +34,14 @@ class JupyterLabSublime {
   // );
   // }
 
+  private map(key: string, cmd: string, selector: string) {
+    this.app.commands.addKeyBinding({
+      command: cmd,
+      keys: [key],
+      selector: selector,
+    });
+  }
+
   private cmMap(key: string, cmd: string) {
     let jlCmd: string = cmd;
     let cmCmd: string;
@@ -47,12 +55,22 @@ class JupyterLabSublime {
         },
       });
     }
+    this.map(key, jlCmd, '.CodeMirror-focused');
+  }
 
-    commands.addKeyBinding({
-      command: jlCmd,
-      keys: [key],
-      selector: '.CodeMirror-focused',
-    });
+  // private bodyMap(key: string, cmd: string) {
+  // this.map(key, cmd, 'body');
+  // }
+
+  private mapp(array: Array<string>) {
+    var n = 2;
+    var chunks = [];
+    for (var i = 0; i < array.length; i += n) {
+      chunks[chunks.length] = array.slice(i, i + n);
+    }
+    for (var i = 0; i < chunks.length; i += 1) {
+      this.map(chunks[i][0], chunks[i][1], 'body');
+    }
   }
 
   private editorExec(id: string) {
@@ -75,9 +93,9 @@ class JupyterLabSublime {
   }
 
   private addCommands() {
-    // let editorExec = this.editorExec;
     let editorExec = this.editorExec.bind(this);
-    // let addCommand = this.addCommand.bind(this);
+    let addCommand = this.addCommand.bind(this);
+
     const { commands } = this.app;
     // tslint:disable-next-line
     // const self = this;
@@ -194,6 +212,23 @@ class JupyterLabSublime {
       },
     });
 
+    addCommand('ak:cwd', () => {
+      var text = (this.app as any).paths.directories.serverRoot;
+      navigator.clipboard.writeText(text).then(
+        function () {
+          console.log('Async: Copying to clipboard was successful!');
+        },
+        function (err) {
+          console.error('Async: Could not copy text: ', err);
+        }
+      );
+    });
+
+    addCommand('ak:test', () => {
+      console.log('test');
+      this.app.commands.execute('notebook:move-cursor-down');
+    });
+
     this.cmMap('Ctrl ArrowLeft', 'cm:eow_left');
     this.cmMap('Ctrl ArrowRight', 'cm:eow_right');
     this.cmMap('Alt ArrowLeft', ':goSubwordLeft');
@@ -204,6 +239,24 @@ class JupyterLabSublime {
     this.cmMap('Ctrl ArrowDown', ':addCursorToNextLine');
     this.cmMap('Ctrl ArrowUp', ':addCursorToPrevLine');
     this.cmMap('Ctrl M', ':goToBracket');
+
+    // this.cmMap('Ctrl Alt Shift C', 'ak:test')
+    // this.bodyMap('Ctrl Alt Shift C', 'ak:cwd')
+    // this.bodyMap('Alt Shift R', 'application:close')
+    // this.bodyMap('Ctrl Tab', 'application:activate-next-tab')
+    // this.bodyMap('Ctrl Shift Tab', 'application:activate-previous-tab')
+    this.mapp([
+      'Ctrl Alt Shift C',
+      'ak:cwd',
+      'Alt Shift R',
+      'application:close',
+      'Ctrl Tab',
+      'application:activate-next-tab',
+      'Ctrl Shift Tab',
+      'application:activate-previous-tab',
+    ]);
+    this.cmMap('Ctrl Alt Shift H', 'ak-test');
+    console.log(this.map);
 
     commands.addCommand('ak:eval_insert', {
       execute: () => {
@@ -230,18 +283,6 @@ class JupyterLabSublime {
       command: 'ak:nlbelow',
       keys: ['Ctrl Alt 3'],
       selector: '.CodeMirror-focused',
-    });
-
-    this.addCommand('ak:cwd', () => {
-      var text = (this.app as any).paths.directories.serverRoot;
-      navigator.clipboard.writeText(text).then(
-        function () {
-          console.log('Async: Copying to clipboard was successful!');
-        },
-        function (err) {
-          console.error('Async: Could not copy text: ', err);
-        }
-      );
     });
 
     commands.addCommand('sublime:subword-backward-deletion', {
@@ -345,33 +386,6 @@ const extension: JupyterFrontEndPlugin<void> = {
   ) => {
     const a = new JupyterLabSublime(app, palette, tracker);
     console.log(a);
-    // a.hello();
-
-    const { commands } = app;
-
-    const command = 'jlab-examples:command-palette';
-
-    // Add a command
-    commands.addCommand(command, {
-      label: 'Execute jlab-examples:command-palette Command',
-      caption: 'Execute jlab-examples:command-palette Command',
-      execute: (args: any) => {
-        var text = (app as any).paths.directories.serverRoot;
-        navigator.clipboard.writeText(text).then(
-          function () {
-            console.log('Async: Copying to clipboard was successful!');
-          },
-          function (err) {
-            console.error('Async: Could not copy text: ', err);
-          }
-        );
-        // console.log('the JupyterLab main application directories:', (app as any).paths);
-      },
-    });
-
-    // Add the command to the command palette
-    const category = 'Extension Examples';
-    palette.addItem({ command, category, args: { origin: 'from palette' } });
   },
 };
 
