@@ -162,7 +162,7 @@ class JupyterLabSublime {
       selector: '.CodeMirror-focused',
     });
 
-    commands.addCommand('cm:bow_right', {
+    commands.addCommand('cm:bow_left', {
       execute: () => {
         editorExec('goWordLeft');
         editorExec('goWordRight');
@@ -170,7 +170,7 @@ class JupyterLabSublime {
       },
     });
 
-    commands.addCommand('cm:bow_left', {
+    commands.addCommand('cm:bow_right', {
       execute: () => {
         editorExec('goCharRight');
         editorExec('goWordLeft');
@@ -223,14 +223,46 @@ class JupyterLabSublime {
         }
       );
     });
+    commands.addCommand('ak:eval_insert', {
+      execute: () => {
+        commands.execute('notebook:run-cell');
+        commands.execute('notebook:enter-edit-mode');
+      },
+    });
+
+    commands.addCommand('ak:down_insert', {
+      execute: () => {
+        // commands.execute('notebook:enter-edit-mode');
+        commands.execute('notebook:enter-command-mode');
+        commands.execute('notebook:move-cursor-down');
+        commands.execute('notebook:enter-edit-mode');
+      },
+    });
+
+    commands.addCommand('ak:up_insert', {
+      execute: () => {
+        // commands.execute('notebook:enter-edit-mode');
+        commands.execute('notebook:enter-command-mode');
+        commands.execute('notebook:move-cursor-up');
+        commands.execute('notebook:enter-edit-mode');
+      },
+    });
+
+    addCommand('ak:recenter', () => {
+      commands.execute('notebook:enter-command-mode');
+      commands.execute('notebook:move-cursor-down');
+      commands.execute('notebook:move-cursor-up');
+      commands.execute('notebook:enter-edit-mode');
+    });
 
     addCommand('ak:test', () => {
       console.log('test');
-      this.app.commands.execute('notebook:move-cursor-down');
+      // this.app.commands.execute('notebook:enter-edit-mode');
+      // this.app.commands.execute('notebook:move-cursor-down');
     });
 
-    this.cmMap('Ctrl ArrowLeft', 'cm:eow_left');
-    this.cmMap('Ctrl ArrowRight', 'cm:eow_right');
+    this.cmMap('Ctrl ArrowLeft', 'cm:bow_left');
+    this.cmMap('Ctrl ArrowRight', 'cm:bow_right');
     this.cmMap('Alt ArrowLeft', ':goSubwordLeft');
     this.cmMap('Alt ArrowRight', ':goSubwordRight');
     this.cmMap('PageDown', 'cm:nlines_down');
@@ -240,36 +272,52 @@ class JupyterLabSublime {
     this.cmMap('Ctrl ArrowUp', ':addCursorToPrevLine');
     this.cmMap('Ctrl M', ':goToBracket');
 
-    // this.cmMap('Ctrl Alt Shift C', 'ak:test')
-    // this.bodyMap('Ctrl Alt Shift C', 'ak:cwd')
-    // this.bodyMap('Alt Shift R', 'application:close')
-    // this.bodyMap('Ctrl Tab', 'application:activate-next-tab')
-    // this.bodyMap('Ctrl Shift Tab', 'application:activate-previous-tab')
     this.mapp([
       'Ctrl Alt Shift C',
       'ak:cwd',
       'Alt Shift R',
       'application:close',
-      'Ctrl Tab',
-      'application:activate-next-tab',
-      'Ctrl Shift Tab',
-      'application:activate-previous-tab',
+      // 'Ctrl Tab', 'application:activate-next-tab',
+      // 'Ctrl Shift Tab', 'application:activate-previous-tab',
+      'Ctrl F8',
+      'ak:down_insert',
+      'Ctrl F9',
+      'ak:up_insert',
+      'Ctrl Enter',
+      'ak:eval_insert',
+      'Ctrl F10',
+      'ak:recenter',
     ]);
-    this.cmMap('Ctrl Alt Shift H', 'ak-test');
-    console.log(this.map);
-
-    commands.addCommand('ak:eval_insert', {
-      execute: () => {
-        commands.execute('notebook:run-cell');
-        commands.execute('notebook:enter-edit-mode');
-      },
-    });
 
     commands.addKeyBinding({
-      command: 'ak:eval_insert',
-      keys: ['N'],
+      command: 'notebook:enter-edit-mode',
+      keys: ['E'],
       selector: '.jp-Notebook:focus',
     });
+    commands.addKeyBinding({
+      command: 'notebook:enter-edit-mode',
+      keys: ['I'],
+      selector: 'jp-Notebook:focus',
+    });
+
+    // [data-jp-kernel-user]:focus
+    // jp-Terminal
+    // jp-SideBar
+    // jp-SettingEditor
+    // jp-Notebook
+    // jp-InputArea-editor
+    // jp-ImageViewer
+    // jp-FileEditor
+    // jp-DirListing-item
+    // jp-DirListing-content
+    // jp-CodeConsole-promptCell
+    // jp-CodeConsole-content
+    // jp-CodeConsole
+    // jp-CodeCell
+    // jp-Cell
+    // jp-Activity
+    //.body:not(.jp-DocumentSearch-overlay)
+    // #id-4ed43c18-2f75-4d2b-b628-17665194ca88 > div.lm-Widget.p-Widget.jp-DocumentSearch-overlay
 
     commands.addCommand('ak:nlbelow', {
       execute: () => {
