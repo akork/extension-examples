@@ -4,7 +4,7 @@ import {
 } from '@jupyterlab/application';
 
 import { ICommandPalette } from '@jupyterlab/apputils';
-import { INotebookTracker } from '@jupyterlab/notebook';
+import { INotebookTracker, NotebookPanel } from '@jupyterlab/notebook';
 import { CodeMirrorEditor } from '@jupyterlab/codemirror';
 
 import '../style/index.css';
@@ -13,15 +13,19 @@ class JupyterLabSublime {
   private tracker: INotebookTracker;
   private app: JupyterFrontEnd;
   private palette: ICommandPalette;
+  private panel: NotebookPanel;
 
   constructor(
     app: JupyterFrontEnd,
     palette: ICommandPalette,
-    tracker: INotebookTracker
+    tracker: INotebookTracker,
+    panel: NotebookPanel
   ) {
     this.app = app;
     this.tracker = tracker;
     this.palette = palette;
+    this.panel = panel;
+    console.log(this.panel);
     this.addCommands();
     this.onActiveCellChanged();
     this.tracker.activeCellChanged.connect(this.onActiveCellChanged, this);
@@ -235,6 +239,11 @@ class JupyterLabSublime {
         // commands.execute('notebook:enter-edit-mode');
         commands.execute('notebook:enter-command-mode');
         commands.execute('notebook:move-cursor-down');
+        let notebook = NotebookPanel.content;
+        // const notebook = this.panel.content;
+        // const activeCell = notebook.activeCell;
+        console.log(notebook);
+        // console.log(activeCell);
         commands.execute('notebook:enter-edit-mode');
       },
     });
@@ -430,9 +439,10 @@ const extension: JupyterFrontEndPlugin<void> = {
   activate: (
     app: JupyterFrontEnd,
     palette: ICommandPalette,
-    tracker: INotebookTracker
+    tracker: INotebookTracker,
+    panel: NotebookPanel
   ) => {
-    const a = new JupyterLabSublime(app, palette, tracker);
+    const a = new JupyterLabSublime(app, palette, tracker, panel);
     console.log(a);
   },
 };
