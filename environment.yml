@@ -1,4 +1,4 @@
-name: jupyterlab-extension-examples
+name: jl
 channels:
   - conda-forge
 dependencies:
@@ -7,5 +7,5 @@ dependencies:
   - nodejs=16
   - pytest
   - pytest-check-links
-  - python=3
+  - python=3.9
   - yarn

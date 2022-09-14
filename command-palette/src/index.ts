@@ -235,7 +235,9 @@ class JupyterLabSublime {
         // commands.execute('notebook:enter-edit-mode');
         commands.execute('notebook:enter-command-mode');
         commands.execute('notebook:move-cursor-down');
-        commands.execute('notebook:enter-edit-mode');
+        if (this.tracker.activeCell.model.type === 'code') {
+          commands.execute('notebook:enter-edit-mode');
+        }
       },
     });
 
@@ -244,7 +246,9 @@ class JupyterLabSublime {
         // commands.execute('notebook:enter-edit-mode');
         commands.execute('notebook:enter-command-mode');
         commands.execute('notebook:move-cursor-up');
-        commands.execute('notebook:enter-edit-mode');
+        if (this.tracker.activeCell.model.type === 'code') {
+          commands.execute('notebook:enter-edit-mode');
+        }
       },
     });
 
@@ -252,11 +256,18 @@ class JupyterLabSublime {
       commands.execute('notebook:enter-command-mode');
       commands.execute('notebook:move-cursor-down');
       commands.execute('notebook:move-cursor-up');
-      commands.execute('notebook:enter-edit-mode');
+      if (this.tracker.activeCell.model.type === 'code') {
+        commands.execute('notebook:enter-edit-mode');
+      }
     });
 
     addCommand('ak:test', () => {
       console.log('test');
+      var cell = this.tracker.activeCell;
+      if (cell.model.type === 'code') {
+        console.log('CODE CODE CODE');
+      }
+
       // this.app.commands.execute('notebook:enter-edit-mode');
       // this.app.commands.execute('notebook:move-cursor-down');
     });
