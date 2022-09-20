@@ -67,13 +67,14 @@ class JupyterLabSublime {
   // }
 
   private mapp(array: Array<string>) {
+    var mode = array[0];
     var n = 2;
     var chunks = [];
-    for (var i = 0; i < array.length; i += n) {
+    for (var i = 1; i < array.length; i += n) {
       chunks[chunks.length] = array.slice(i, i + n);
     }
     for (var i = 0; i < chunks.length; i += 1) {
-      this.map(chunks[i][0], chunks[i][1], 'body');
+      this.map(chunks[i][0], chunks[i][1], mode);
     }
   }
 
@@ -227,25 +228,28 @@ class JupyterLabSublime {
         }
       );
     });
-    commands.addCommand('ak:eval_insert', {
-      execute: () => {
-        commands.execute('notebook:run-cell');
+    addCommand('ak:eval-insert', () => {
+      commands.execute('notebook:run-cell');
+      commands.execute('notebook:enter-edit-mode');
+    });
+
+    addCommand('ak:eval-down-insert', () => {
+      commands.execute('notebook:run-cell');
+      commands.execute('notebook:move-cursor-down');
+      commands.execute('notebook:enter-edit-mode');
+    });
+
+    addCommand('ak:down-insert', () => {
+      // commands.execute('notebook:enter-edit-mode');
+      commands.execute('notebook:enter-command-mode');
+      commands.execute('notebook:move-cursor-down');
+      if (this.tracker.activeCell.model.type === 'code') {
         commands.execute('notebook:enter-edit-mode');
-      },
+      }
+      console.log(this.tracker.activeCell);
     });
 
-    commands.addCommand('ak:down_insert', {
-      execute: () => {
-        // commands.execute('notebook:enter-edit-mode');
-        commands.execute('notebook:enter-command-mode');
-        commands.execute('notebook:move-cursor-down');
-        if (this.tracker.activeCell.model.type === 'code') {
-          commands.execute('notebook:enter-edit-mode');
-        }
-      },
-    });
-
-    commands.addCommand('ak:up_insert', {
+    commands.addCommand('ak:up-insert', {
       execute: () => {
         // commands.execute('notebook:enter-edit-mode');
         commands.execute('notebook:enter-command-mode');
@@ -263,6 +267,30 @@ class JupyterLabSublime {
       if (this.tracker.activeCell.model.type === 'code') {
         commands.execute('notebook:enter-edit-mode');
       }
+    });
+
+    addCommand('ak:insert-cell-below', () => {
+      commands.execute('notebook:insert-cell-below');
+      commands.execute('notebook:enter-edit-mode');
+    });
+
+    addCommand('ak:insert-cell-above', () => {
+      commands.execute('notebook:insert-cell-above');
+      commands.execute('notebook:enter-edit-mode');
+    });
+
+    addCommand('ak:delete-cell', () => {
+      commands.execute('notebook:delete-cell');
+      if (this.tracker.activeCell.model.type === 'code') {
+        commands.execute('notebook:enter-edit-mode');
+      }
+    });
+
+    addCommand('ak:close-other', () => {
+      commands.execute('application:activate-next-tab-bar');
+      setTimeout(() => {
+        commands.execute('application:close');
+      }, 100);
     });
 
     addCommand('ak:test', () => {
@@ -288,32 +316,65 @@ class JupyterLabSublime {
     this.cmMap('Ctrl M', ':goToBracket');
 
     this.mapp([
+      'body',
+      'Ctrl Shift P',
+      'apputils:activate-command-palette',
       'Ctrl Alt Shift C',
       'ak:cwd',
       'Alt Shift R',
       'application:close',
-      // 'Ctrl Tab', 'application:activate-next-tab',
-      // 'Ctrl Shift Tab', 'application:activate-previous-tab',
+      'Ctrl Tab',
+      'application:activate-next-tab',
+      'Ctrl Shift Tab',
+      'application:activate-previous-tab',
       'Ctrl F8',
-      'ak:down_insert',
+      'ak:down-insert',
       'Ctrl F9',
-      'ak:up_insert',
-      'Ctrl Enter',
-      'ak:eval_insert',
+      'ak:up-insert',
       'Ctrl F10',
       'ak:recenter',
+      'Ctrl Alt Shift B',
+      'ak:insert-cell-below',
+      'Ctrl Alt Shift A',
+      'ak:insert-cell-above',
+      'Ctrl Alt Shift D',
+      'ak:delete-cell',
+
+      'Alt Shift F12',
+      'application:toggle-mode',
+      'Alt F12',
+      'notebook:run-in-console',
+      'Ctrl F12',
+      'ak:close-other',
+      'Ctrl Shift F12',
+      'application:close',
+      'Ctrl Alt F12',
+      'application:activate-next-tab-bar',
+      'Ctrl Alt Shift F12',
+      'application:activate-previous-tab-bar',
+      'F2',
+      'docmanager:rename',
+
+      // 'Ctrl Alt Shift F12', 'statusbar:toggle',
     ]);
 
-    commands.addKeyBinding({
-      command: 'notebook:enter-edit-mode',
-      keys: ['E'],
-      selector: '.jp-Notebook:focus',
-    });
-    commands.addKeyBinding({
-      command: 'notebook:enter-edit-mode',
-      keys: ['I'],
-      selector: 'jp-Notebook:focus',
-    });
+    this.mapp([
+      '.jp-Notebook.jp-mod-editMode',
+      'Ctrl Enter',
+      'ak:eval-insert',
+      'Shift Enter',
+      'ak:eval-down-insert',
+    ]);
+
+    this.mapp([
+      '.jp-Notebook:focus',
+      'E',
+      'notebook:enter-edit-mode',
+      'H',
+      'notebook:move-cursor-down',
+      'T',
+      'notebook:move-cursor-up',
+    ]);
 
     // [data-jp-kernel-user]:focus
     // jp-Terminal
